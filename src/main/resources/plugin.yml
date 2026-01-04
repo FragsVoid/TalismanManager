@@ -1,0 +1,13 @@
+name: TalismanManager
+version: '1.0'
+main: org.frags.talismanManager.TalismanMain
+api-version: '1.21'
+commands:
+  talisman:
+    description: "Talisman open menu"
+    aliases:
+      - talismanes
+      - talismans
+      - talis
+      - ab
+      - accessorybag

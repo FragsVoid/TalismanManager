@@ -1,0 +1,25 @@
+talismanes:
+  zombie_artifact:
+    display_name: "&2Artefacto Zombie"
+    item_id: "ROTTEN_FLESH" # ID de tu CustomItems o Material
+    rarity: "RARE"
+    attributes:
+      - type: "DEFENSE_REDUCTION" # Menos daño recibido
+        value: 0.20               # 20%
+        conditions:
+          entities:               # Solo aplica si el atacante es:
+            - "ZOMBIE"
+            - "ZOMBIE_VILLAGER"
+            - "DROWNED"
+
+  slayer_talisman:
+    display_name: "&cTalismán de Cazador"
+    item_id: "IRON_SWORD"
+    rarity: "COMMON"
+    attributes:
+      - type: "DAMAGE_BONUS"      # Más daño realizado
+        value: 0.10
+        conditions:
+          entities:               # Solo aplica si la victima es:
+            - "SPIDER"
+            - "CAVE_SPIDER"
