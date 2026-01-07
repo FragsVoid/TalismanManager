@@ -88,4 +88,8 @@ public final class TalismanMain extends JavaPlugin {
         if (id == null) return null;
         return talismans.get(id.toLowerCase());
     }
+
+    public List<Talisman> getTalismans() {
+        return talismans.values().stream().toList();
+    }
 }
