@@ -17,12 +17,14 @@ import java.util.logging.Level;
 public final class TalismanMain extends JavaPlugin {
 
     public final NamespacedKey talismanKey = new NamespacedKey(this, "talisman");
+    private static TalismanMain instance;
 
     private Map<String, Talisman> talismans = new HashMap<>();
     private TalismanManager talismanManager;
 
     @Override
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
 
         talismanManager = new TalismanManager(this);
@@ -68,6 +70,10 @@ public final class TalismanMain extends JavaPlugin {
         }
 
         getLogger().info("Cargados " + count + " talismanes.");
+    }
+
+    public static TalismanMain getInstance() {
+        return instance;
     }
 
     public TalismanManager getTalismanManager() {
