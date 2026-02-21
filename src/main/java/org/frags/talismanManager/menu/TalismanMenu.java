@@ -6,8 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.frags.customItems.menu.Menu;
 import org.frags.customItems.menu.PlayerMenuUtility;
 import org.frags.talismanManager.TalismanMain;
@@ -26,7 +27,20 @@ public class TalismanMenu extends Menu<TalismanMain, PlayerMenuUtility> {
 
     @Override
     public int getSlots() {
-        return 54;
+        Player player = playerMenuUtility.getPlayer();
+        if (player.hasPermission("talisman.slots.6")) {
+            return 54;
+        } else if (player.hasPermission("talisman.slots.5")) {
+            return 45;
+        } else if (player.hasPermission("talisman.slots.4")) {
+            return 36;
+        } else if (player.hasPermission("talisman.slots.3")) {
+            return 27;
+        } else if (player.hasPermission("talisman.slots.2")) {
+            return 18;
+        }
+
+        return 9;
     }
 
     @Override

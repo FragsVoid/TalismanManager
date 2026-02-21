@@ -17,6 +17,7 @@ import java.util.logging.Level;
 public final class TalismanMain extends JavaPlugin {
 
     public final NamespacedKey talismanKey = new NamespacedKey(this, "talisman");
+    public final NamespacedKey randomKey = new NamespacedKey(this, "random");
     private static TalismanMain instance;
 
     private Map<String, Talisman> talismans = new HashMap<>();

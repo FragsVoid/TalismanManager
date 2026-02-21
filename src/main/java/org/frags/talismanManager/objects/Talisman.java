@@ -62,14 +62,17 @@ public class Talisman {
     }
 
     public ItemStack buildItem() {
-        ItemStack baseItem = CustomItems.getInstance().getItemProvider().getItem(itemId);
+        ItemStack originalItem = CustomItems.getInstance().getItemProvider().getItem(itemId);
 
-        if (baseItem == null) {
+        if (originalItem == null) {
             throw new RuntimeException("Item " + itemId + " not found!");
         }
 
+        ItemStack baseItem = originalItem.clone();
+
         ItemMeta meta = baseItem.getItemMeta();
         meta.getPersistentDataContainer().set(plugin.talismanKey, PersistentDataType.STRING, id);
+        meta.getPersistentDataContainer().set(plugin.randomKey, PersistentDataType.STRING, UUID.randomUUID().toString());
         baseItem.setItemMeta(meta);
 
         return baseItem;

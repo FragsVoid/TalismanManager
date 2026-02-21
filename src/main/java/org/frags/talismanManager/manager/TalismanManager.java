@@ -27,12 +27,15 @@ public class TalismanManager {
     public void recalculateStats(Player player, ItemStack[] bagContents) {
         Map<TalismanStat, List<StatAttribute>> stats = new HashMap<>();
 
+        Set<String> calculatedIds = new HashSet<>();
+
         for (ItemStack item : bagContents) {
             if (item == null || !item.hasItemMeta()) continue;
 
             String id = item.getItemMeta().getPersistentDataContainer().get(plugin.talismanKey, PersistentDataType.STRING);
-            if (id == null) continue;
+            if (id == null || calculatedIds.contains(id)) continue;
 
+            calculatedIds.add(id);
             Talisman talisman = plugin.getTalisman(id);
             if (talisman != null) {
                 for (StatAttribute attr : talisman.getAttributes()) {

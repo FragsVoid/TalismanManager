@@ -27,6 +27,10 @@ public class StatAttribute {
     }
 
     public boolean appliesTo(EntityType target) {
+        if (target == null) return true;
+        if (target.equals(EntityType.PLAYER)) {
+            return false;
+        }
         if (targetEntities == null || targetEntities.isEmpty()) return true;
         return targetEntities.contains(target);
     }

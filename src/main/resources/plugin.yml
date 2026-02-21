@@ -11,3 +11,19 @@ commands:
       - talis
       - ab
       - accessorybag
+permissions:
+  talisman.slots.6:
+    description: Otorga 6 filas en el talismán.
+    default: false
+  talisman.slots.5:
+    description: Otorga 5 filas en el talismán.
+    default: false
+  talisman.slots.4:
+    description: Otorga 4 filas en el talismán.
+    default: false
+  talisman.slots.3:
+    description: Otorga 3 filas en el talismán.
+    default: false
+  talisman.slots.2:
+    description: Otorga 2 filas en el talismán.
+    default: false

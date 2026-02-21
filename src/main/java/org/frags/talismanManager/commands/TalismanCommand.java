@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TalismanCommand implements CommandExecutor, TabCompleter {
@@ -28,86 +29,143 @@ public class TalismanCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
-
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "Only players can execute this command.");
-            return true;
-        }
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
 
         if (args.length == 0) {
-            new TalismanMenu(plugin, CustomItems.getInstance().getMenuManager().getPlayerMenuUtility(player)).open();
+            if (sender instanceof Player player) {
+                new TalismanMenu(plugin, CustomItems.getInstance().getMenuManager().getPlayerMenuUtility(player)).open();
+            } else {
+                sender.sendMessage(ChatColor.RED + "La consola no puede abrir menús. Usa /talisman give <player> <id>");
+            }
             return true;
         }
 
-        if (!player.hasPermission("talisman.get")) {
-            player.sendMessage(ChatColor.RED + "No tienes permiso para usar este comando.");
-            return true;
-        }
+        String subCommand = args[0].toLowerCase();
 
-        if (args[0].equalsIgnoreCase("reload")) {
-            plugin.reloadConfig();
-            plugin.loadTalismans();
-            player.sendMessage(ChatColor.GREEN + "Talisman config reloaded.");
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("reset")) {
-            Player p = Bukkit.getPlayer(args[1]);
-            if (p == null) {
-                player.sendMessage(ChatColor.RED + "Player not found.");
+        if (subCommand.equals("reload")) {
+            if (!sender.hasPermission("talisman.admin")) {
+                sender.sendMessage(ChatColor.RED + "No tienes permiso.");
                 return true;
             }
-
-            plugin.getTalismanManager().saveTalismanBag(player, new ItemStack[0]);
-            player.sendMessage(ChatColor.GREEN + "Talisman config reset.");
+            plugin.reloadConfig();
+            plugin.loadTalismans();
+            sender.sendMessage(ChatColor.GREEN + "Talisman config reloaded.");
             return true;
         }
 
-        if (!args[0].equalsIgnoreCase("get")) {
-            player.sendMessage("Usage: /talisman get <id>");
+        if (subCommand.equals("reset")) {
+            if (!sender.hasPermission("talisman.admin")) {
+                sender.sendMessage(ChatColor.RED + "No tienes permiso.");
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage(ChatColor.RED + "Uso: /talisman reset <player>");
+                return true;
+            }
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage(ChatColor.RED + "Jugador no encontrado.");
+                return true;
+            }
+            plugin.getTalismanManager().saveTalismanBag(target, new ItemStack[0]);
+            sender.sendMessage(ChatColor.GREEN + "Bolsa de talismanes reseteada para " + target.getName());
             return true;
         }
 
-        else if (args.length == 1) {
-            sender.sendMessage(ChatColor.RED + "Invalid arguments.");
-        }
-
-        String id = args[1];
-        Talisman talisman = plugin.getTalisman(id);
-        if (talisman == null) {
-            player.sendMessage(ChatColor.RED + "That id is null!");
+        if (subCommand.equals("get")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(ChatColor.RED + "La consola debe usar: /talisman give <player> <id>");
+                return true;
+            }
+            if (!player.hasPermission("talisman.get")) {
+                player.sendMessage(ChatColor.RED + "No tienes permiso.");
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.RED + "Uso: /talisman get <id>");
+                return true;
+            }
+            giveTalisman(sender, player, args[1]);
             return true;
         }
 
-        ItemStack itemStack = talisman.buildItem();
-        player.getInventory().addItem(itemStack);
-        player.sendMessage(ChatColor.GREEN + "Talisman has been created!");
+        if (subCommand.equals("give")) {
+            if (!sender.hasPermission("talisman.give")) {
+                sender.sendMessage(ChatColor.RED + "No tienes permiso.");
+                return true;
+            }
+            if (args.length < 3) {
+                sender.sendMessage(ChatColor.RED + "Uso: /talisman give <player> <id>");
+                return true;
+            }
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                sender.sendMessage(ChatColor.RED + "Jugador " + args[1] + " no encontrado.");
+                return true;
+            }
+            giveTalisman(sender, target, args[2]);
+            return true;
+        }
 
+        sender.sendMessage(ChatColor.RED + "Comando desconocido. Usa /talisman");
         return true;
     }
 
-    @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
-        if (!(commandSender instanceof Player player)) {
-            return List.of();
+    private void giveTalisman(CommandSender sender, Player receiver, String talismanId) {
+        Talisman talisman = plugin.getTalisman(talismanId);
+        if (talisman == null) {
+            sender.sendMessage(ChatColor.RED + "El talismán con ID '" + talismanId + "' no existe.");
+            return;
         }
 
-        if (!player.hasPermission("talisman.get")) {
-            return List.of();
+        ItemStack itemStack = talisman.buildItem();
+
+        if (receiver.getInventory().firstEmpty() == -1) {
+            receiver.getWorld().dropItem(receiver.getLocation(), itemStack);
+            receiver.sendMessage(ChatColor.YELLOW + "Tu inventario estaba lleno, el talismán cayó al suelo.");
+        } else {
+            receiver.getInventory().addItem(itemStack);
         }
+
+        if (!sender.equals(receiver)) {
+            sender.sendMessage(ChatColor.GREEN + "Has dado " + talismanId + " a " + receiver.getName());
+        }
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
 
         if (args.length == 1) {
-            return List.of("get", "reload", "reset");
+            List<String> completions = new ArrayList<>();
+            if (sender.hasPermission("talisman.get")) completions.add("get");
+            if (sender.hasPermission("talisman.give")) completions.add("give");
+            if (sender.hasPermission("talisman.admin")) {
+                completions.add("reload");
+                completions.add("reset");
+            }
+            return StringUtil.copyPartialMatches(args[0], completions, new ArrayList<>());
         }
-        else if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("get")) {
+
+        if (args.length == 2) {
+            String sub = args[0].toLowerCase();
+
+            if (sub.equals("get") && sender.hasPermission("talisman.get")) {
                 return StringUtil.copyPartialMatches(args[1], plugin.allIds(), new ArrayList<>());
-            } else if (args[0].equalsIgnoreCase("reset")) {
-                return StringUtil.copyPartialMatches(args[1], Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(), new ArrayList<>());
+            }
+
+            if ((sub.equals("give") || sub.equals("reset")) && sender.hasPermission("talisman.give")) {
+                return null;
             }
         }
 
-        return List.of();
+        if (args.length == 3) {
+            String sub = args[0].toLowerCase();
+
+            if (sub.equals("give") && sender.hasPermission("talisman.give")) {
+                return StringUtil.copyPartialMatches(args[2], plugin.allIds(), new ArrayList<>());
+            }
+        }
+
+        return Collections.emptyList();
     }
 }
